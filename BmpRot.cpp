@@ -2,6 +2,7 @@
 #include <vector>
 #include "Gradient.h"
 #include "BMP.h"
+#include "MeanShift.h"
 using namespace std;
 
 // 图像大小
@@ -38,22 +39,11 @@ void gradientPrior(vector<unsigned char>& image) {
     }
 }
 
-int main() {
-    string filename = "bb.bmp";
-    BMPHeader header;
-    BMPInfoHeader info_header;
-    vector<unsigned char> image;
-    vector<unsigned char> segmentation;
-    // 此处省略对image的读取过程
-    if (!readBMP(filename, image, header, info_header)) {
-        return -1;
-    }
-    
-    segmentation.resize(image.size());
-
+//梯度先验
+void GradientChecking(vector<unsigned char>& image, vector<unsigned char>& segmentation, BMPInfoHeader info_header) {
     float* gradient_map = new float[info_header.width * info_header.height];
-    
-    computeGradientMap(image, info_header, gradient_map);
+
+    computeGradientMap(image, info_header, gradient_map);   //获取每个像素梯度
 
     //float* prior_map = new float[info_header.width * info_header.height];
     float a = 50.0f; // 先验权重
@@ -61,11 +51,60 @@ int main() {
 
     grabCut(image, gradient_map, info_header, a, segmentation);     //图像分割
 
-    // 此处省略对image的保存过程
-    if (!writeBMP("test.bmp", segmentation, header, info_header)) {
+    delete[]gradient_map;
+}
+
+//均值漂移
+void MeanShift(vector<unsigned char>& image, vector<unsigned char>& segmented_image, BMPInfoHeader info_header) {
+    int height = info_header.height, width = info_header.width;
+
+    // 定义带宽参数和分割阈值
+    float bandwidth = 30.0f;
+    int threshold = 1;
+
+    // 进行图像分割
+    vector<vector<Pixel>> segments = image_segmentation(image, width, height, bandwidth);
+
+    // 将分割结果保存为图像
+    segmented_image = vector<unsigned char>(image.size(), 255);
+    for (const auto& segment : segments)
+    {
+        //continue;
+        if (segment.size() < threshold)
+        {
+            continue;
+        }
+        Pixel color{ rand() % 256, rand() % 256, rand() % 256 };
+        for (const auto& pixel : segment)
+        {
+            segmented_image[pixel.r + pixel.g * width + pixel.b * width * height] = color.r;
+            segmented_image[pixel.r + pixel.g * width + pixel.b * width * height + 1] = color.g;
+            segmented_image[pixel.r + pixel.g * width + pixel.b * width * height + 2] = color.b;
+        }
+    }
+
+}
+
+int main() {
+    string filename = "bb.bmp";
+    BMPHeader header;
+    BMPInfoHeader info_header;
+    vector<unsigned char> image;    //输入像素数据
+    vector<unsigned char> segmentation; //输出像素数据
+    // 读取24bit BMP文件
+    if (!readBMP(filename, image, header, info_header)) {
+        return -1;
+    }
+    
+    segmentation.resize(image.size());
+
+    //GradientChecking(image, segmentation, info_header); //梯度先验
+    MeanShift(image, segmentation, info_header);          //均值漂移
+
+    // 写入BMP
+    if (!writeBMP("test2.bmp", segmentation, header, info_header)) {
         return -1;
     }
 
-    delete[] gradient_map;
     return 0;
 }
