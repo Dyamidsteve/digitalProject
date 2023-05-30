@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include "Gradient.h"
 #include "BMP.h"
 using namespace std;
 
@@ -7,7 +8,7 @@ using namespace std;
 const int WIDTH = 640;
 const int HEIGHT = 480;
 
-// 梯度先验算法
+ //梯度先验算法
 void gradientPrior(vector<unsigned char>& image) {
     vector<double> gradient(image.size()); // 存储梯度信息
     // 计算像素梯度
@@ -38,18 +39,33 @@ void gradientPrior(vector<unsigned char>& image) {
 }
 
 int main() {
-    string filename = "ddd.bmp";
+    string filename = "bb.bmp";
     BMPHeader header;
     BMPInfoHeader info_header;
     vector<unsigned char> image;
+    vector<unsigned char> segmentation;
     // 此处省略对image的读取过程
     if (!readBMP(filename, image, header, info_header)) {
         return -1;
     }
-    gradientPrior(image);
+    
+    segmentation.resize(image.size());
+
+    float* gradient_map = new float[info_header.width * info_header.height];
+    
+    computeGradientMap(image, info_header, gradient_map);
+
+    //float* prior_map = new float[info_header.width * info_header.height];
+    float a = 50.0f; // 先验权重
+    //computePrior(gradient_map, info_header, a, prior_map);
+
+    grabCut(image, gradient_map, info_header, a, segmentation);     //图像分割
+
     // 此处省略对image的保存过程
-    if (!writeBMP("test.bmp", image, header, info_header)) {
+    if (!writeBMP("test.bmp", segmentation, header, info_header)) {
         return -1;
     }
+
+    delete[] gradient_map;
     return 0;
 }
