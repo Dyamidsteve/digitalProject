@@ -3,9 +3,8 @@
 #include "Gradient.h"
 #include "BMP.h"
 #include "MeanShift.h"
-#include "MeanShif2.h"
 #include "Opposition.h"
-#include "Interpolation.h"
+//#include "Interpolation.h"
 using namespace std;
 
 // 图像大小
@@ -89,21 +88,21 @@ void MeanShift(vector<unsigned char>& image, vector<unsigned char>& segmented_im
 
 }
 
-//均值漂移1
-void MeanShift2(vector<unsigned char>& image, vector<unsigned char>& segmented_image, BMPInfoHeader info_header) {
-    int height = info_header.height, width = info_header.width;
-
-    // 定义带宽参数和分割阈值
-    int channel = 3;
-    int spatial_radius = 8;
-    int color_radius = 16;
-
-    mean_shift_segmentation(image, height, width, channel, spatial_radius, color_radius, segmented_image);
-
-    //// 图像分割函数
-    //void mean_shift_segmentation(std::vector<unsigned char>&image, int height, int width, int channel, int spatial_radius, int color_radius, std::vector<unsigned char>&result)
-
-}
+////均值漂移1
+//void MeanShift2(vector<unsigned char>& image, vector<unsigned char>& segmented_image, BMPInfoHeader info_header) {
+//    int height = info_header.height, width = info_header.width;
+//
+//    // 定义带宽参数和分割阈值
+//    int channel = 3;
+//    int spatial_radius = 8;
+//    int color_radius = 16;
+//
+//    mean_shift_segmentation(image, height, width, channel, spatial_radius, color_radius, segmented_image);
+//
+//    //// 图像分割函数
+//    //void mean_shift_segmentation(std::vector<unsigned char>&image, int height, int width, int channel, int spatial_radius, int color_radius, std::vector<unsigned char>&result)
+//
+//}
 
 int main() {
     string filename = "bb.bmp";
@@ -122,10 +121,11 @@ int main() {
     //MeanShift(image, segmentation, info_header);          //均值漂移
     //MeanShift2(image, segmentation, info_header);          //均值漂移
     //Opposition(image, segmentation);                        //反相
-    nearestInterpolation(image, segmentation, info_header.width, info_header.height);
+    //nearestInterpolation(image, segmentation, info_header.width, info_header.height);
+    //waveletBlur(image, info_header.width, info_header.height);
 
     // 写入BMP
-    if (!writeBMP("test2.bmp", segmentation, header, info_header)) {
+    if (!writeBMP("test2.bmp", image, header, info_header)) {
         return -1;
     }
 

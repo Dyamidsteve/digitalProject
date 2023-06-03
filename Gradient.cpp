@@ -51,9 +51,11 @@ void grabCut(vector<unsigned char>& image,float* gradient_map, BMPInfoHeader& in
             int newValue;
             if (alpha <= a) {
                 // 梯度很低，无需修改像素值
-                newValue = 255;
+                newValue = (image[index] + image[index + 1] + image[index + 2]) / 3;
+               // newValue = 0;
             }
             else {
+                newValue = (image[index] + image[index + 1] + image[index + 2]) / 3;
                 newValue = 0;
             }
 
