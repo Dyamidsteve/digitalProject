@@ -4,6 +4,7 @@
 #include "BMP.h"
 #include "MeanShift.h"
 #include "Opposition.h"
+#include "Wave.h"
 //#include "Interpolation.h"
 using namespace std;
 
@@ -56,59 +57,14 @@ void GradientChecking(vector<unsigned char>& image, vector<unsigned char>& segme
     delete[]gradient_map;
 }
 
-//均值漂移1
-void MeanShift(vector<unsigned char>& image, vector<unsigned char>& segmented_image, BMPInfoHeader info_header) {
-    int height = info_header.height, width = info_header.width;
 
-    // 定义带宽参数和分割阈值
-    float bandwidth = 30.0f;
-    int threshold = 1;
-
-    // 进行图像分割
-    vector<vector<Pixel>> segments = image_segmentation(image, width, height, bandwidth);
-
-    // 将分割结果保存为图像
-    segmented_image = vector<unsigned char>(image.size(), 255);
-    for (const auto& segment : segments)
-    {
-        //continue;
-        if (segment.size() < threshold)
-        {
-            continue;
-        }
-        Pixel color{ rand() % 256, rand() % 256, rand() % 256 };
-        for (const auto& pixel : segment)
-        {
-            int index = 3 * (pixel.r + pixel.g * width + pixel.b * width * height);//pixel.r + pixel.g * width + pixel.b * width * height;
-            segmented_image[index] = color.r;
-            segmented_image[index+1] = color.g;
-            segmented_image[index+2]= color.b;
-        }
-    }
-
-}
-
-////均值漂移1
-//void MeanShift2(vector<unsigned char>& image, vector<unsigned char>& segmented_image, BMPInfoHeader info_header) {
-//    int height = info_header.height, width = info_header.width;
-//
-//    // 定义带宽参数和分割阈值
-//    int channel = 3;
-//    int spatial_radius = 8;
-//    int color_radius = 16;
-//
-//    mean_shift_segmentation(image, height, width, channel, spatial_radius, color_radius, segmented_image);
-//
-//    //// 图像分割函数
-//    //void mean_shift_segmentation(std::vector<unsigned char>&image, int height, int width, int channel, int spatial_radius, int color_radius, std::vector<unsigned char>&result)
-//
-//}
 
 int main() {
     string filename = "bb.bmp";
     BMPHeader header;
     BMPInfoHeader info_header;
     vector<unsigned char> image;    //输入像素数据
+    //unsigned char* image = nullptr;
     vector<unsigned char> segmentation; //输出像素数据
     // 读取24bit BMP文件
     if (!readBMP(filename, image, header, info_header)) {
@@ -117,12 +73,26 @@ int main() {
     
     segmentation.resize(image.size());
 
-    GradientChecking(image, segmentation, info_header); //梯度先验
-    //MeanShift(image, segmentation, info_header);          //均值漂移
-    //MeanShift2(image, segmentation, info_header);          //均值漂移
+    //GradientChecking(image, segmentation, info_header); //梯度先验
     //Opposition(image, segmentation);                        //反相
     //nearestInterpolation(image, segmentation, info_header.width, info_header.height);
-    //waveletBlur(image, info_header.width, info_header.height);
+    int width = info_header.width, height = info_header.height;
+    //shock_filter(image, width, height, 10, 0.25f, 10.0f);
+    //ShockFilter(std::vector<unsigned char> image, int width, int height, double standard_deviation, int threshold, int filter_size, int num_iterations);
+
+
+    /*
+    double standard_deviation = 0.01f;
+    int threshold = 10;
+    int filter_size = 3;
+    int num_iterations = 2;
+    ShockFilter sf(image,width,height,standard_deviation,threshold,filter_size,num_iterations);
+    sf.filter();
+    segmentation = sf.get_result();
+    */
+
+    segmentation = meanShift(image, width, height, 310.20f, 310.20f);
+    
 
     // 写入BMP
     if (!writeBMP("test2.bmp", segmentation, header, info_header)) {

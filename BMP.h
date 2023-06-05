@@ -40,5 +40,9 @@ typedef struct tagRGBQUAD {
 // 从文件中读取BMP图像并返回图像数据
 bool readBMP(string filename, vector<unsigned char>& image, BMPHeader& header, BMPInfoHeader& info_header);
 
+bool readBMP2(string filename, unsigned char* image, BMPHeader& header, BMPInfoHeader& info_header);
+
 // 将图像数据保存为 BMP 文件
 bool writeBMP(string filename, vector<unsigned char>& image, BMPHeader& header, BMPInfoHeader& info_header);
+
+bool writeBMP2(string filename, unsigned char* image, BMPHeader& header, BMPInfoHeader& info_header);
