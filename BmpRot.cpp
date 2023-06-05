@@ -117,7 +117,7 @@ int main() {
     
     segmentation.resize(image.size());
 
-    //GradientChecking(image, segmentation, info_header); //梯度先验
+    GradientChecking(image, segmentation, info_header); //梯度先验
     //MeanShift(image, segmentation, info_header);          //均值漂移
     //MeanShift2(image, segmentation, info_header);          //均值漂移
     //Opposition(image, segmentation);                        //反相
@@ -125,7 +125,7 @@ int main() {
     //waveletBlur(image, info_header.width, info_header.height);
 
     // 写入BMP
-    if (!writeBMP("test2.bmp", image, header, info_header)) {
+    if (!writeBMP("test2.bmp", segmentation, header, info_header)) {
         return -1;
     }
 
